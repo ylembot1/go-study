@@ -43,4 +43,23 @@ func main() {
 		fmt.Println(n)
 	}
 
+	stringIteration()
+
+}
+
+// range 遍历字符串：字符遍历
+func stringIteration() {
+	s := "Hello, 世界"
+
+	// 字节遍历
+	fmt.Println("字节遍历:")
+	for i := 0; i < len(s); i++ {
+		fmt.Printf("  索引%d: %d (%c)\n", i, s[i], s[i])
+	}
+
+	// 字符遍历 (使用range)
+	fmt.Println("字符遍历:")
+	for i, r := range s {
+		fmt.Printf("  索引%d: %d (%c)\n", i, r, r)
+	}
 }
