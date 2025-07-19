@@ -88,10 +88,16 @@ func main() {
 	testSlice2 := append(append(append(slice, 1), 2), 3)
 	slice[0] = 11
 
-	fmt.Println(testSlice1[0]) // 11
-	fmt.Println(testSlice2[0]) // 10
-	fmt.Println(arr1)          // [11 20 1 2]
-	fmt.Println("len:", len(slice), "cap:", cap(slice))
-	fmt.Println("len:", len(testSlice1), "cap:", cap(testSlice1))
-	fmt.Println("len:", len(testSlice2), "cap:", cap(testSlice2))
+	fmt.Println(testSlice1[0])                                    // 11
+	fmt.Println(testSlice2[0])                                    // 10
+	fmt.Println(arr1)                                             // [11 20 1 2]
+	fmt.Println("len:", len(slice), "cap:", cap(slice))           // len: 2 cap: 4
+	fmt.Println("len:", len(testSlice1), "cap:", cap(testSlice1)) // len: 2 cap: 4
+	fmt.Println("len:", len(testSlice2), "cap:", cap(testSlice2)) // len: 5 cap: 8
+
+	tt := make([]int, 4, 10)
+	fmt.Println("tt:", tt, "len:", len(tt), "cap:", cap(tt))
+	tt = append(tt, 1)
+	fmt.Println("tt:", tt, "len:", len(tt), "cap:", cap(tt))
+
 }
