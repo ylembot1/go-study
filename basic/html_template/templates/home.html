@@ -1,0 +1,12 @@
+{{define "title"}}Home Page{{end}}
+
+{{define "header"}}
+  <h1>Welcome to {{.SiteName}}</h1>
+{{end}}
+
+{{define "content"}}
+  <section>
+    <h2>Special Offers</h2>
+    <p>{{.PromoText | safeHTML}}</p>
+  </section>
+{{end}}

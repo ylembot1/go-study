@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -217,6 +219,111 @@ func example_channel_range() {
 	}
 }
 
+func example_worker_pool() {
+	jobNumbers := 5
+	jobs := make(chan int, jobNumbers)
+	results := make(chan int, jobNumbers)
+
+	for w := 1; w <= 3; w++ {
+		go func(workerId int, jobs <-chan int, results chan<- int) {
+			fmt.Println("worker initialized: ", workerId)
+			for j := range jobs {
+				fmt.Println("worker", workerId, "processing job", j)
+				time.Sleep(time.Second)
+				results <- j * 2
+			}
+		}(w, jobs, results)
+	}
+
+	for j := 1; j <= jobNumbers; j++ {
+		jobs <- j
+	}
+	close(jobs)
+
+	for a := 1; a <= jobNumbers; a++ {
+		<-results
+	}
+}
+
+// To wait for multiple goroutines to finish, we can use a wait group.
+func example_waitgroup() {
+	var wg sync.WaitGroup
+
+	worker := func(id int) {
+		fmt.Printf("Worker %d starting\n", id)
+		time.Sleep(time.Second)
+		fmt.Printf("Worker %d done\n", id)
+	}
+
+	for i := 1; i <= 5; i++ {
+		// Launch several goroutines and increment the WaitGroup counter for each.
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			worker(i)
+		}(i)
+	}
+
+	// Block until the WaitGroup counter goes back to 0; all the workers notified they’re done.
+	wg.Wait()
+	fmt.Println("All workers done")
+}
+
+func example_atomic_counter() {
+	var ops atomic.Int64
+
+	var wg sync.WaitGroup
+
+	ops.Store(1)
+
+	for range 50 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for range 1000 {
+				ops.Add(1)
+			}
+		}()
+	}
+
+	wg.Wait()
+	fmt.Println("ops:", ops.Load())
+}
+
+type Counter struct {
+	mu       sync.Mutex
+	counters map[string]int
+}
+
+func (c *Counter) Inc(key string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.counters[key]++
+}
+
+func example_mutex() {
+	c := Counter{counters: make(map[string]int)}
+
+	doIncrement := func(name string, n int) {
+		for range n {
+			c.Inc(name)
+		}
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(5)
+
+	for i := 0; i < 5; i++ {
+		go func(i int) {
+			defer wg.Done()
+			doIncrement("a", 1000)
+		}(i)
+	}
+
+	wg.Wait()
+	fmt.Println("counters:", c.counters)
+}
+
 func main() {
 	example_basic_1()
 	fmt.Println("--------------------------------")
@@ -233,4 +340,15 @@ func main() {
 	example_channel_non_blocking()
 	fmt.Println("--------------------------------")
 	example_channel_close()
+	fmt.Println("--------------------------------")
+	example_channel_range()
+	fmt.Println("--------------------------------")
+	example_worker_pool()
+	fmt.Println("--------------------------------")
+	example_waitgroup()
+	fmt.Println("--------------------------------")
+	example_atomic_counter()
+
+	fmt.Println("--------------------------------")
+	example_mutex()
 }
